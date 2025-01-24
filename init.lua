@@ -1,3 +1,4 @@
 require('core')
-require('plugins')
+require('config')
+
 -- vim.cmd("source /usr/share/doc/fzf/examples/fzf.vim")
