@@ -1,3 +1,6 @@
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_node_provider = 0
+
 -- Side number options
 vim.opt.number = true
 vim.opt.relativenumber = true

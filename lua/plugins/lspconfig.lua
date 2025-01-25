@@ -21,7 +21,7 @@ return {
                 ensure_installed = {
                     "lua_ls",
                     "jdtls",
-                    "ts_sl",
+                    "ts_ls",
                     "clangd",
                     "pyright",
                 },
@@ -61,7 +61,7 @@ return {
                         },},
                 },
                 jdtls = {},
-                ts_sl = {},
+                ts_ls = {},
                 clangd = {},
                 pyright = {},
             }
