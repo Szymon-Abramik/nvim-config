@@ -15,7 +15,7 @@ vim.opt.smartcase = true
 vim.opt.ignorecase = true
 
 -- Max scroll
-vim.opt.scrolloff = 10
+vim.opt.scrolloff = 8
 
 -- Splitting options
 vim.opt.splitbelow = true
@@ -32,4 +32,5 @@ vim.opt.inccommand = "split"
 vim.opt.termguicolors = true
 vim.opt.clipboard = "unnamedplus"
 
-
+-- Disable the fill chars
+-- vim.cmd[[set fillchars+=eob:\ ]]
