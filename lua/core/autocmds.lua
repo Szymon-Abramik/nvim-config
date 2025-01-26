@@ -1,20 +1,21 @@
--- Highlight when yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost', {
-    desc = 'Highlight when yanking (copying) text',
+    desc = 'AutoCmd: Highlight when yanking (copying) text',
     group = vim.api.nvim_create_augroup('highlight-yank', { clear = true }),
     callback = function()
         vim.highlight.on_yank()
     end,
 })
 
--- Automatically trims trailing whitespace on write
 vim.api.nvim_create_autocmd("BufWritePre", {
+    desc = 'AutoCmd: Automatically trims trailing whitespace on write',
+    group = vim.api.nvim_create_augroup('trim-whitespaces-write', { clear = true }),
     pattern = { "*" },
     command = [[%s/\s\+$//e]],
 })
 
--- Deleting windows end line character ^M
 vim.api.nvim_create_autocmd("BufWritePre", {
+    desc = 'AutoCmd: Deleting windows end line character ^M',
+    group = vim.api.nvim_create_augroup('delete-windows-eol-write', { clear = true }),
     pattern = "*",
     callback = function()
         vim.cmd([[ %s/\r//e ]])

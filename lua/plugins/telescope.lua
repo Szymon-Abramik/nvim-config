@@ -2,6 +2,19 @@ return {
     'nvim-telescope/telescope.nvim', tag = '0.1.8',
     dependencies = { 'nvim-lua/plenary.nvim', {'nvim-telescope/telescope-fzf-native.nvim', build = 'make'} },
     config = function()
+        local side_preview = {
+            layout_strategy = 'horizontal',
+            layout_config = {
+                horizontal = {
+                    preview_width = 0.7,
+                },
+            },
+        }
+        local no_preview = {
+            previewer = false,
+            layout_strategy = 'center',
+        }
+        require('telescope').load_extension('fzf')
         require('telescope').setup({
             defaults = {
                 prompt_prefix = '🔍 ',
@@ -14,42 +27,13 @@ return {
 
             },
             pickers = {
-                diagnostics = {
-                    layout_strategy = 'horizontal',
-                    layout_config = {
-                        horizontal = {
-                            preview_width = 0.7,
-                        },
-                    },
-                },
-                live_grep = {
-                    layout_strategy = 'horizontal',
-                    layout_config = {
-                        horizontal = {
-                            preview_width = 0.7,
-                        },
-                    },
-                },
-                find_files = {
-                    previewer = false,
-                    layout_strategy = 'center',
-                },
-                buffers = {
-                    previewer = false,
-                    layout_strategy = 'center',
-                },
-                help_tags = {
-                    previewer = false,
-                    layout_strategy = 'center',
-                },
-                current_buffer_fuzzy_find = {
-                    previewer = false,
-                    layout_strategy = 'center',
-                },
-                git_files = {
-                    previewer = false,
-                    layout_strategy = 'center',
-                },
+                diagnostics = side_preview,
+                live_grep = side_preview,
+                find_files = no_preview,
+                buffers = no_preview,
+                help_tags = no_preview ,
+                current_buffer_fuzzy_find = no_preview,
+                git_files = no_preview ,
             },
             extensions = {
                 fzf = {
@@ -59,9 +43,8 @@ return {
                 },
             },
         })
-        require('telescope').load_extension('fzf')
-        local builtin = require('telescope.builtin')
 
+        local builtin = require('telescope.builtin')
         local mappings = {
             { 'n', '<leader>sh', builtin.help_tags, '[S]earch [h]elp' },
             { 'n', '<leader>sk', builtin.keymaps, '[S]earch [k]eymaps' },

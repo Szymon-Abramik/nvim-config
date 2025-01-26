@@ -25,91 +25,123 @@ return {
                     "clangd",
                     "pyright",
                 },
-
             })
         end,
     },
     {
         "neovim/nvim-lspconfig",
         config = function()
-            local lspconfig = require("lspconfig")
-            local capabilities = require("cmp_nvim_lsp").default_capabilities()
+            local on_attach = function(client, bufnr)
+                local side_preview = {
+                    layout_strategy = 'horizontal',
+                    layout_config = {
+                        horizontal = {
+                            preview_width = 0.7,
+                        },
+                    },
+                }
+                local no_preview = {
+                    previewer = false,
+                    layout_strategy = 'center',
+                }
+                require('telescope').setup({
+                    pickers = {
+                        lsp_definitions = side_preview,
+                        lsp_references = side_preview,
+                        find_files = no_preview,
+                        buffers = no_preview,
+                        help_tags = no_preview ,
+                        current_buffer_fuzzy_find = no_preview,
+                        git_files = no_preview ,
+                    },
+                    extensions = {
+                        fzf = {
+                            fuzzy = true,
+                            override_generic_sorter = true,
+                            override_file_sorter = true,
+                        },
+                    },
+                })
+
+                local builtin = require('telescope.builtin')
+                local mappings = {
+                    { 'gd', builtin.lsp_definitions, '[G]oto [d]efinition' },
+                    { 'gr', builtin.lsp_references, '[G]oto [r]eferences' },
+                    { '<leader>gI', builtin.lsp_implementations, '[G]oto [i]mplementation' },
+                    { '<leader>D', builtin.lsp_type_definitions, 'Type [d]efinition' },
+                    { '<leader>ds', builtin.lsp_document_symbols, '[D]ocument [s]ymbols' },
+                    { '<leader>ws', builtin.lsp_dynamic_workspace_symbols, '[W]orkspace [s]ymbols' },
+                    { '<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame' },
+                    { '<leader>ca', vim.lsp.buf.code_action, '[C]ode [a]ction' },
+                    { 'K', vim.lsp.buf.hover, 'Hover Documentation' },
+                    { 'gD', vim.lsp.buf.declaration, '[G]oto [d]eclaration' },
+                }
+                for _, mapping in ipairs(mappings) do
+                    vim.keymap.set('n', mapping[1], mapping[2], { buffer = bufnr, desc = 'LSP: ' .. mapping[3] })
+                end
+                if client.server_capabilities.documentHighlightProvider then
+                    vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+                        group = vim.api.nvim_create_augroup('lsp-highlight', { clear = true }),
+                        buffer = bufnr,
+                        callback = vim.lsp.buf.document_highlight,
+                    })
+
+                    vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+                        group = vim.api.nvim_create_augroup('lsp-clear', { clear = true }),
+                        buffer = bufnr,
+                        callback = vim.lsp.buf.clear_references,
+                    })
+                end
+            end
 
             local servers = {
                 lua_ls = {
                     settings = {
                         Lua = {
                             runtime = {
-                                version = "LuaJIT",
-                                path = vim.split(package.path, ";"),
+                                version = 'LuaJIT',
                             },
                             diagnostics = {
                                 globals = { "vim" },
                             },
                             workspace = {
-                                library = {
-                                    vim.fn.stdpath("config"),
-                                    vim.fn.stdpath("data"),
-                                    vim.fn.expand("$VIMRUNTIME"),
-                                    vim.api.nvim_get_runtime_file("", true),
-                                },
                                 checkThirdParty = false,
+                                library = {
+                                    vim.env.VIMRUNTIME,
+                                },
                             },
                             telemetry = {
                                 enable = false,
                             },
-                        },},
+                        },
+                    },
                 },
                 jdtls = {},
                 ts_ls = {},
                 clangd = {},
-                pyright = {},
+                pyright = {
+                    settings = {
+                        python = {
+                            analysis = {
+                                typeCheckingMode = "strict",
+                                autoSearchPaths = true,
+                                useLibraryCodeForTypes = true,
+                            },
+                        },
+                    },
+                },
             }
+
+            local lspconfig = require("lspconfig")
+            local capabilities = vim.lsp.protocol.make_client_capabilities()
+            capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
             for server, config in pairs(servers) do
                 lspconfig[server].setup(vim.tbl_deep_extend("force", {
                     capabilities = capabilities,
-                    handlers = handlers,
+                    on_attach = on_attach,
                 }, config))
             end
-
-            vim.api.nvim_create_autocmd('LspAttach', {
-                group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
-                callback = function(event)
-                    local builtin = require('telescope.builtin')
-
-                    local mappings = {
-                        { 'gd', builtin.lsp_definitions, '[G]oto [d]efinition' },
-                        { 'gr', builtin.lsp_references, '[G]oto [r]eferences' },
-                        { 'gI', builtin.lsp_implementations, '[G]oto [i]mplementation' },
-                        { '<leader>D', builtin.lsp_type_definitions, 'Type [d]efinition' },
-                        { '<leader>ds', builtin.lsp_document_symbols, '[D]ocument [s]ymbols' },
-                        { '<leader>ws', builtin.lsp_dynamic_workspace_symbols, '[W]orkspace [s]ymbols' },
-                        { '<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame' },
-                        { '<leader>ca', vim.lsp.buf.code_action, '[C]ode [a]ction' },
-                        { 'K', vim.lsp.buf.hover, 'Hover Documentation' },
-                        { 'gD', vim.lsp.buf.declaration, '[G]oto [d]eclaration' },
-                    }
-
-                    for _, mapping in ipairs(mappings) do
-                        vim.keymap.set('n', mapping[1], mapping[2], { buffer = bufnr, desc = 'LSP: ' .. mapping[3] })
-                    end
-                    local client = vim.lsp.get_client_by_id(event.data.client_id)
-                    if client and client.server_capabilities.documentHighlightProvider then
-                        vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-                            group = vim.api.nvim_create_augroup('lsp-highlight', { clear = true }),
-                            buffer = event.buf,
-                            callback = vim.lsp.buf.document_highlight,
-                        })
-
-                        vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-                            group = vim.api.nvim_create_augroup('lsp-clear', { clear = true }),
-                            buffer = event.buf,
-                            callback = vim.lsp.buf.clear_references,
-                        })
-                    end
-                end,
-            })
         end,
     },
 }
