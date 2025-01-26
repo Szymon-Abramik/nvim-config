@@ -48,11 +48,10 @@ return {
                     pickers = {
                         lsp_definitions = side_preview,
                         lsp_references = side_preview,
-                        find_files = no_preview,
-                        buffers = no_preview,
-                        help_tags = no_preview ,
-                        current_buffer_fuzzy_find = no_preview,
-                        git_files = no_preview ,
+                        lsp_implementations = side_preview,
+                        lsp_type_definitions = side_preview,
+                        lsp_document_symbols = no_preview,
+                        lsp_workspace_symbols = no_preview,
                     },
                     extensions = {
                         fzf = {
@@ -68,7 +67,19 @@ return {
                     { 'gd', builtin.lsp_definitions, '[G]oto [d]efinition' },
                     { 'gr', builtin.lsp_references, '[G]oto [r]eferences' },
                     { '<leader>gI', builtin.lsp_implementations, '[G]oto [i]mplementation' },
-                    { '<leader>D', builtin.lsp_type_definitions, 'Type [d]efinition' },
+                    -- { '<leader>D', builtin.lsp_type_definitions, 'Type [d]efinition' },
+                    { '<leader>sc', function()
+                        builtin.lsp_workspace_symbols({
+                            prompt_title = "Search Classes in Workspace",
+                            symbols = { "class", "type" },
+                        })
+                    end, '[S]earch [C]lasses in workspace' },
+                    { '<leader>sm', function()
+                        builtin.lsp_document_symbols({
+                            prompt_title = "Search Methods in File",
+                            symbols = { "method", "function" },
+                        })
+                    end, '[S]earch [M]ethods in file' },
                     { '<leader>ds', builtin.lsp_document_symbols, '[D]ocument [s]ymbols' },
                     { '<leader>ws', builtin.lsp_dynamic_workspace_symbols, '[W]orkspace [s]ymbols' },
                     { '<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame' },

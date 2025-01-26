@@ -29,11 +29,26 @@ return {
                 }),
                 sources = cmp.config.sources({
                     { name = "nvim_lsp" },
+                    { name = "nvim_lsp_signature_help" },
                     { name = "luasnip" },
                 }, {
                     { name = "buffer" },
                     { name = "path" },
                 }),
+                 formatting = {
+                    fields = { "kind", "abbr", "menu" },
+                    format = function(entry, item)
+                        local menu_icon = {
+                            nvim_lsp = "λ",
+                            buffer = "[Buffer]",
+                            path = "[Path]",
+                            luasnip = "[Snippet]",
+                            nvim_lsp_signature_help = "[Signature]",
+                        }
+                        item.menu = menu_icon[entry.source.name] or entry.source.name
+                        return item
+                    end,
+                },
             })
 
             cmp.setup.cmdline({ "/", "?" }, {
